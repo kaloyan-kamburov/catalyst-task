@@ -1,10 +1,11 @@
 export interface TableColumn {
   key: string;
   label: string;
-  type?: "string" | "range" | "date" | "select";
+  type?: "string" | "number" | "date" | "select";
   align?: "text-left" | "text-center" | "text-right";
   render?: (row: TableRow) => React.ReactNode;
   filterable?: boolean;
+  filterType?: "range" | "date" | "select";
   filterOptions?: string[];
   /** Whether the column is sortable. Defaults to true. Set to false to disable sorting. */
   sortable?: boolean;
@@ -14,8 +15,8 @@ export interface TableType {
   url: string;
   columns: TableColumn[];
   pageSizeOptions?: number[];
-  hideErrorToast?: boolean;
-  hideSuccessToast?: boolean;
+  /** Whether to enable search functionality. Defaults to true. */
+  searchable?: boolean;
 }
 
 export type TableFilterType = TableColumn & {

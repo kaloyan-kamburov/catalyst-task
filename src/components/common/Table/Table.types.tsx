@@ -10,7 +10,7 @@ export interface TableFilterType {
   filterOptions?: string[];
 }
 
-export interface TableType {
+export type TableType = {
   url: string;
   columns: {
     key: string;
@@ -23,7 +23,10 @@ export interface TableType {
     render?: (row: { [key: string]: any }) => React.ReactNode;
   }[];
   pageSizeOptions?: number[];
-}
+  searchable?: boolean;
+  hideErrorToast?: boolean;
+  hideSuccessToast?: boolean;
+};
 
 export type TableRow = {
   id: string | number;

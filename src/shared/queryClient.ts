@@ -29,7 +29,9 @@ axiosInstance.interceptors.response.use(
       const axiosError = error as AxiosError;
       const apiError: ApiError = {
         status: axiosError.response?.status || 500,
-        message: axiosError.response?.data?.message || axiosError.message,
+        message:
+          (axiosError.response?.data as { message?: string })?.message ||
+          axiosError.message,
         data: axiosError.response?.data,
       };
       throw apiError;

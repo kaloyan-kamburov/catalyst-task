@@ -138,7 +138,7 @@ const TableFilters = ({
           onSubmit={handleSubmit}
           className="flex flex-wrap flex-col justify-start gap-4 mt-2 p-4 border border-gray-300 rounded"
         >
-          <div className="flex flex-wrap grid grid-cols-3 gap-4">
+          <div className="flex flex-wrap grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {allFilters
               .filter((filter) => filter.filterable)
               .map((filter) => (

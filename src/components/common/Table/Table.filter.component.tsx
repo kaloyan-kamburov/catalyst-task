@@ -16,7 +16,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
 
   const handleClear = () => {
     switch (filter.type) {
-      case "range":
+      case "number":
         setLocalValue({ min: undefined, max: undefined });
         handleFilterChange(filter.key, { min: undefined, max: undefined });
         break;
@@ -39,14 +39,14 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
 
   const renderFlter = () => {
     switch (filter.type) {
-      case "range":
+      case "number":
         return (
           <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="number"
                 placeholder="Min"
-                className="w-24 px-2 py-1 border border-gray-300 rounded"
+                className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded"
                 onChange={(e) =>
                   handleChange({
                     min: e.target.value ? Number(e.target.value) : undefined,
@@ -57,7 +57,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
               <input
                 type="number"
                 placeholder="Max"
-                className="w-24 px-2 py-1 border border-gray-300 rounded"
+                className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded"
                 onChange={(e) =>
                   handleChange({
                     ...localValue,
@@ -72,10 +72,10 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
 
       case "date":
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="date"
-              className="px-2 py-1 border border-gray-300 rounded"
+              className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded"
               onChange={(e) =>
                 handleChange({
                   ...localValue,
@@ -86,7 +86,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
             />
             <input
               type="date"
-              className="px-2 py-1 border border-gray-300 rounded"
+              className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded"
               onChange={(e) =>
                 handleChange({
                   ...localValue,
@@ -102,7 +102,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
         return (
           <div className="flex flex-col gap-2">
             <select
-              className="px-2 py-1 border border-gray-300 rounded"
+              className="w-full px-2 py-1 border border-gray-300 rounded"
               onChange={(e) =>
                 handleChange({
                   value: e.target.value || undefined,

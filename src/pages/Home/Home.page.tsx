@@ -34,7 +34,7 @@ const Home = () => {
           {
             key: "amount",
             label: "Amount",
-            type: "range",
+            type: "number",
             filterable: true,
           },
           {
@@ -85,7 +85,7 @@ const Home = () => {
           {
             key: "fees",
             label: "Fees",
-            type: "range",
+            type: "number",
           },
         ]}
       />

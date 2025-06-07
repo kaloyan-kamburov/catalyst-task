@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   axiosInstance,
@@ -30,6 +30,7 @@ const Table: React.FC<TableType> = ({
   url,
   columns,
   pageSizeOptions = [10, 20, 50, 100],
+  searchable = true,
 }) => {
   const [isInitialLoaded, setIsInitialLoaded] = useState(false);
   const [page, setPage] = useState(1);
@@ -38,6 +39,8 @@ const Table: React.FC<TableType> = ({
   const [filters, setFilters] = useState<{ [key: string]: TableFilterValue }>({});
   const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const lastSuccessfulPage = useRef(page);
   const lastSuccessfulPageSize = useRef(pageSize);
@@ -59,11 +62,33 @@ const Table: React.FC<TableType> = ({
     });
   };
 
+  const handleSearch = useCallback(
+    (value: string) => {
+      if (searchTimeout?.current) {
+        clearTimeout(searchTimeout.current);
+      }
+
+      searchTimeout.current = setTimeout(() => {
+        setSearchTerm(value);
+        setPage(1);
+      }, 500);
+    },
+    [setSearchTerm, setPage]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  }, []);
+
   const { data, isLoading, isFetching, isLoadingError, error, refetch } = useQuery<
     TableResponse,
     ApiError
   >({
-    queryKey: ["transactions", page, pageSize, filters, sort],
+    queryKey: ["transactions", page, pageSize, filters, sort, searchTerm],
     queryFn: async () => {
       const queryParams = new URLSearchParams({
         page: page.toString(),
@@ -83,6 +108,11 @@ const Table: React.FC<TableType> = ({
       // Add sort parameter if sorting is active
       if (sort) {
         queryParams.append("sort", sort.order === "desc" ? `-${sort.key}` : sort.key);
+      }
+
+      // Add search parameter if search is active
+      if (searchable && searchTerm) {
+        queryParams.append("search", searchTerm);
       }
 
       return axiosInstance.get(`${url}?${queryParams.toString()}`);
@@ -140,13 +170,40 @@ const Table: React.FC<TableType> = ({
       ) : (
         <>
           {isFetching && <LoaderInner />}
-          <div className="flex justify-start">
+          <div className="flex justify-between items-start">
             <TableFilters
               allFilters={columns as TableFilterType[]}
               onFilterChange={handleFilterChange}
               chosenFilters={filters}
             />
           </div>
+          {searchable && (
+            <div className="relative w-full max-w-[500px]">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+              <svg
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+          )}
+
           <table className="table-fixed w-full border border-gray-300 rounded">
             <thead>
               <tr>

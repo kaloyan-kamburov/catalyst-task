@@ -85,7 +85,7 @@ const Home = () => {
           {
             key: "fees",
             label: "Fees",
-            type: "number",
+            type: "range",
           },
         ]}
       />

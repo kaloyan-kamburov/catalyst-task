@@ -15,7 +15,8 @@ import LoaderInner from "../Loaders/LoaderInner.component";
 import ErrorInner from "../Errors/ErrorInner.component";
 import TableFilters from "./Table.filters.component";
 
-const formatValue = (value: string | number, type: string): string => {
+const formatValue = (value: string | number | undefined, type: string): string => {
+  if (value === undefined) return "";
   if (type === "number" && typeof value === "number") {
     return value.toFixed(2);
   }
@@ -33,7 +34,7 @@ const Table: React.FC<TableType> = ({
   const [isInitialLoaded, setIsInitialLoaded] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(pageSizeOptions[0]);
-  // const [sort, setSort] = useState<{ key: string; order: "asc" | "desc" } | null>(null);
+  const [sort, setSort] = useState<{ key: string; order: "asc" | "desc" } | null>(null);
   const [filters, setFilters] = useState<{ [key: string]: TableFilterValue }>({});
   const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -47,11 +48,22 @@ const Table: React.FC<TableType> = ({
     setPage(1);
   };
 
+  const handleSort = (key: string) => {
+    setSort((prev) => {
+      if (prev?.key === key) {
+        // Toggle order if same column
+        return prev.order === "asc" ? { key, order: "desc" } : null; // Remove sort if already desc
+      }
+      // New column sort always starts with asc
+      return { key, order: "asc" };
+    });
+  };
+
   const { data, isLoading, isFetching, isLoadingError, error, refetch } = useQuery<
     TableResponse,
     ApiError
   >({
-    queryKey: ["transactions", page, pageSize, filters],
+    queryKey: ["transactions", page, pageSize, filters, sort],
     queryFn: async () => {
       const queryParams = new URLSearchParams({
         page: page.toString(),
@@ -67,13 +79,19 @@ const Table: React.FC<TableType> = ({
           return acc;
         }, {} as Record<string, string>),
       });
+
+      // Add sort parameter if sorting is active
+      if (sort) {
+        queryParams.append("sort", sort.order === "desc" ? `-${sort.key}` : sort.key);
+      }
+
       return axiosInstance.get(`${url}?${queryParams.toString()}`);
     },
     meta: {
       showToastOnError: isInitialLoaded,
     } satisfies QueryOptions,
-    placeholderData: keepPreviousData,
     gcTime: 0,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
@@ -129,12 +147,42 @@ const Table: React.FC<TableType> = ({
               chosenFilters={filters}
             />
           </div>
-          <table className="table-auto w-full border border-gray-300 rounded">
+          <table className="table-fixed w-full border border-gray-300 rounded">
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th className="p-[5px] border-b border-gray-300" key={column.key}>
-                    {column.label}
+                  <th
+                    className={`p-[5px] border-b border-gray-300 ${
+                      column.sortable !== false ? "cursor-pointer hover:bg-gray-50" : ""
+                    }`}
+                    key={column.key}
+                    onClick={() => column.sortable !== false && handleSort(column.key)}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {column.label}
+                      {column.sortable !== false && (
+                        <div className="flex flex-col">
+                          {sort?.key === column.key ? (
+                            <svg
+                              width="12"
+                              height="12"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              className={`transition-transform ${
+                                sort.order === "desc" ? "rotate-180" : ""
+                              } text-blue-500`}
+                            >
+                              <path
+                                d="M11 2.206l-6.235 7.528-.765-.645 7.521-9 7.479 9-.764.646-6.236-7.53v21.884h-1v-21.883z"
+                                fill="currentColor"
+                                transform="scale(0.5)"
+                              />
+                            </svg>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>

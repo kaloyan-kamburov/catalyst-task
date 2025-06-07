@@ -39,7 +39,7 @@ const TableFilters = ({
       if (!value) return;
 
       switch (filter.type) {
-        case "range": {
+        case "number": {
           const rangeFilter = value as { min?: number; max?: number } | undefined;
           const min = rangeFilter?.min;
           const max = rangeFilter?.max;

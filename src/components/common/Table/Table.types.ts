@@ -1,53 +1,45 @@
+export interface TableColumn {
+  key: string;
+  label: string;
+  type?: "string" | "range" | "date" | "select";
+  align?: "text-left" | "text-center" | "text-right";
+  render?: (row: TableRow) => React.ReactNode;
+  filterable?: boolean;
+  filterOptions?: string[];
+  /** Whether the column is sortable. Defaults to true. Set to false to disable sorting. */
+  sortable?: boolean;
+}
+
 export interface TableType {
   url: string;
-  columns: Array<{
-    key: string;
-    label: string;
-    type?: string;
-    align?: string;
-    render?: (row: {
-      [key: string]: number | string;
-    }) => React.ReactNode | string | number;
-    filterable?: boolean;
-    sortable?: boolean;
-  }>;
+  columns: TableColumn[];
   pageSizeOptions?: number[];
   hideErrorToast?: boolean;
   hideSuccessToast?: boolean;
 }
 
-export type TableColumnType = {
-  key: string;
-  label: string;
-  type: "string" | "number" | "date" | "boolean" | "select";
-  sortable?: boolean;
-  filterable?: boolean;
-  align?: "left" | "center" | "right";
-  filterOptions?: string[];
-  render?: (value: unknown) => React.ReactNode;
-};
-
-export type TableFilterType = {
-  key: string;
-  label: string;
-  type: "range" | "select" | "date";
+export type TableFilterType = TableColumn & {
   filterable: boolean;
-  filterOptions?: string[];
+  filterType: "range" | "date" | "select";
 };
 
-export type TableFilterValue = {
-  [key: string]: string | number | undefined;
-};
+export type TableFilterValue = Partial<{
+  min: number;
+  max: number;
+  start: string;
+  end: string;
+  value: string;
+}>;
 
-export type TableRow = {
+export interface TableRow {
   id: string | number;
-  [key: string]: string | number;
-};
+  [key: string]: string | number | undefined;
+}
 
-export type TableResponse = {
+export interface TableResponse {
   data: {
     data: TableRow[];
     totalPages: number;
     totalRecords: number;
   };
-};
+}

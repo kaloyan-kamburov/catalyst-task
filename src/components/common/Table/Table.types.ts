@@ -17,6 +17,7 @@ export interface TableType {
   pageSizeOptions?: number[];
   /** Whether to enable search functionality. Defaults to true. */
   searchable?: boolean;
+  minWidth?: number;
 }
 
 export type TableFilterType = TableColumn & {

@@ -31,6 +31,7 @@ const Table: React.FC<TableType> = ({
   columns,
   pageSizeOptions = [10, 20, 50, 100],
   searchable = true,
+  minWidth = 1400,
 }) => {
   const [isInitialLoaded, setIsInitialLoaded] = useState(false);
   const [page, setPage] = useState(1);
@@ -203,63 +204,66 @@ const Table: React.FC<TableType> = ({
               </svg>
             </div>
           )}
-
-          <table className="table-fixed w-full border border-gray-300 rounded">
-            <thead>
-              <tr>
-                {columns.map((column) => (
-                  <th
-                    className={`p-[5px] border-b border-gray-300 ${
-                      column.sortable !== false ? "cursor-pointer hover:bg-gray-50" : ""
-                    }`}
-                    key={column.key}
-                    onClick={() => column.sortable !== false && handleSort(column.key)}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      {column.label}
-                      {column.sortable !== false && (
-                        <div className="flex flex-col">
-                          {sort?.key === column.key ? (
-                            <svg
-                              width="12"
-                              height="12"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fillRule="evenodd"
-                              clipRule="evenodd"
-                              className={`transition-transform ${
-                                sort.order === "desc" ? "rotate-180" : ""
-                              } text-blue-500`}
-                            >
-                              <path
-                                d="M11 2.206l-6.235 7.528-.765-.645 7.521-9 7.479 9-.764.646-6.236-7.53v21.884h-1v-21.883z"
-                                fill="currentColor"
-                                transform="scale(0.5)"
-                              />
-                            </svg>
-                          ) : null}
-                        </div>
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data?.data?.data?.map((row) => (
-                <tr key={row.id} className="border-b border-gray-300 hover:bg-gray-50">
+          <div className="overflow-x-auto">
+            <table
+              className={`table-auto w-full border border-gray-300 rounded min-w-[${minWidth}px]`}
+            >
+              <thead>
+                <tr>
                   {columns.map((column) => (
-                    <td
-                      className={`${column.align || "text-center"} px-[5px]`}
+                    <th
+                      className={`p-[5px] border-b border-gray-300 ${
+                        column.sortable !== false ? "cursor-pointer hover:bg-gray-50" : ""
+                      }`}
                       key={column.key}
+                      onClick={() => column.sortable !== false && handleSort(column.key)}
                     >
-                      {column.render?.(row) ||
-                        formatValue(row[column.key], column.type || "string")}
-                    </td>
+                      <div className="flex items-center justify-center gap-1">
+                        {column.label}
+                        {column.sortable !== false && (
+                          <div className="flex flex-col">
+                            {sort?.key === column.key ? (
+                              <svg
+                                width="12"
+                                height="12"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                className={`transition-transform ${
+                                  sort.order === "desc" ? "rotate-180" : ""
+                                } text-blue-500`}
+                              >
+                                <path
+                                  d="M11 2.206l-6.235 7.528-.765-.645 7.521-9 7.479 9-.764.646-6.236-7.53v21.884h-1v-21.883z"
+                                  fill="currentColor"
+                                  transform="scale(0.5)"
+                                />
+                              </svg>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data?.data?.data?.map((row) => (
+                  <tr key={row.id} className="border-b border-gray-300 hover:bg-gray-50">
+                    {columns.map((column) => (
+                      <td
+                        className={`${column.align || "text-center"} px-[5px]`}
+                        key={column.key}
+                      >
+                        {column.render?.(row) ||
+                          formatValue(row[column.key], column.type || "string")}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <ol className="flex justify-end text-xs font-medium space-x-1">
             <li className="flex items-center justify-center pr-[15px]">
               <select

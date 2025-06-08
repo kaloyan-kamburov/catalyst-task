@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
@@ -12,20 +12,24 @@ import type {
   TableType,
   TableFilterValue,
   TableResponse,
+  TableRow,
 } from "./Table.types";
 import LoaderInner from "../Loaders/LoaderInner.component";
 import ErrorInner from "../Errors/ErrorInner.component";
 import TableFilters from "./Table.filters.component";
 
-const formatValue = (value: string | number | undefined, type: string): string => {
-  if (value === undefined) return "";
+const formatValue = (
+  value: string | number | boolean | null | undefined,
+  type: string
+): string => {
+  if (value === undefined || value === null) return "";
   if (type === "number" && typeof value === "number") {
     return value.toFixed(2);
   }
-  if (type === "date" && typeof value === "string") {
-    return new Date(value).toLocaleDateString();
+  if (type === "date" && (typeof value === "string" || typeof value === "number")) {
+    return new Date(String(value)).toLocaleDateString();
   }
-  return `${value}`;
+  return String(value);
 };
 
 const Table: React.FC<TableType> = ({
@@ -34,6 +38,7 @@ const Table: React.FC<TableType> = ({
   pageSizeOptions = [10, 20, 50, 100],
   searchable = true,
   minWidth = 1400,
+  mode = "server",
 }) => {
   const [isInitialLoaded, setIsInitialLoaded] = useState(false);
   const [page, setPage] = useState(1);
@@ -44,11 +49,110 @@ const Table: React.FC<TableType> = ({
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [loadingExport, setLoadingExport] = useState(false);
+  const [clientData, setClientData] = useState<TableRow[]>([]);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const lastSuccessfulPage = useRef(page);
   const lastSuccessfulPageSize = useRef(pageSize);
   const previousPage = useRef(page);
+
+  // Client-side data processing functions
+  const filterClientData = useCallback(
+    (data: TableRow[]) => {
+      let filteredData = [...data];
+
+      if (Object.keys(filters).length > 0) {
+        filteredData = filteredData.filter((row) => {
+          return Object.entries(filters).every(([key, filter]) => {
+            if (!filter) return true;
+            const value = row[key];
+            const column = columns.find((col) => col.key === key);
+
+            if (!column) return true;
+
+            switch (column.type) {
+              case "number": {
+                const numValue = Number(value);
+                if (filter.min !== undefined && numValue < filter.min) return false;
+                if (filter.max !== undefined && numValue > filter.max) return false;
+                return true;
+              }
+              case "date": {
+                const dateValue = value ? new Date(String(value)).getTime() : 0;
+                if (filter.start && new Date(filter.start).getTime() > dateValue)
+                  return false;
+                if (filter.end && new Date(filter.end).getTime() < dateValue)
+                  return false;
+                return true;
+              }
+              case "select":
+                return !filter.value || value === filter.value;
+              default:
+                return true;
+            }
+          });
+        });
+      }
+
+      if (searchText) {
+        const searchLower = searchText.toLowerCase();
+        filteredData = filteredData.filter((row) => {
+          return columns.some((column) => {
+            if (column.type === "string" || !column.type) {
+              const value = row[column.key];
+              return value && String(value).toLowerCase().includes(searchLower);
+            }
+            return false;
+          });
+        });
+      }
+
+      // Apply sort
+      if (sort) {
+        filteredData.sort((a, b) => {
+          const aValue = a[sort.key];
+          const bValue = b[sort.key];
+          const column = columns.find((col) => col.key === sort.key);
+
+          let comparison = 0;
+          switch (column?.type) {
+            case "number":
+              comparison = Number(aValue) - Number(bValue);
+              break;
+            case "date":
+              comparison =
+                aValue && bValue
+                  ? new Date(String(aValue)).getTime() -
+                    new Date(String(bValue)).getTime()
+                  : 0;
+              break;
+            default:
+              comparison = String(aValue).localeCompare(String(bValue));
+          }
+
+          return sort.order === "asc" ? comparison : -comparison;
+        });
+      }
+
+      return filteredData;
+    },
+    [filters, searchText, sort, columns]
+  );
+
+  const processedData = useMemo(() => {
+    if (mode === "client" && clientData.length > 0) {
+      const filteredData = filterClientData(clientData);
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+
+      return {
+        data: filteredData.slice(start, end),
+        totalRecords: filteredData.length,
+        totalPages: Math.ceil(filteredData.length / pageSize),
+      };
+    }
+    return null;
+  }, [mode, clientData, filterClientData, page, pageSize]);
 
   const handleFilterChange = (newFilters: { [key: string]: TableFilterValue }) => {
     setFilters(newFilters);
@@ -58,10 +162,8 @@ const Table: React.FC<TableType> = ({
   const handleSort = (key: string) => {
     setSort((prev) => {
       if (prev?.key === key) {
-        // Toggle order if same column
-        return prev.order === "asc" ? { key, order: "desc" } : null; // Remove sort if already desc
+        return prev.order === "asc" ? { key, order: "desc" } : null;
       }
-      // New column sort always starts with asc
       return { key, order: "asc" };
     });
   };
@@ -99,53 +201,63 @@ const Table: React.FC<TableType> = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(urlObj);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_e) {
+    } catch (_error) {
       toast.error("Error while exporting to CSV");
     } finally {
       setLoadingExport(false);
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (searchTimeout.current) {
-        clearTimeout(searchTimeout.current);
-      }
-    };
-  }, []);
-
   const { data, isLoading, isFetching, isLoadingError, error, refetch } = useQuery<
     TableResponse,
     ApiError
   >({
-    queryKey: ["transactions", page, pageSize, filters, sort, searchText],
+    queryKey: [
+      "transactions",
+      mode === "server" ? page : undefined,
+      mode === "server" ? pageSize : undefined,
+      mode === "server" ? filters : undefined,
+      mode === "server" ? sort : undefined,
+      mode === "server" ? searchText : undefined,
+    ],
     queryFn: async () => {
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-        ...Object.entries(filters).reduce((acc, [key, value]) => {
+      const queryParams = new URLSearchParams();
+
+      if (mode === "server") {
+        queryParams.append("page", page.toString());
+        queryParams.append("pageSize", pageSize.toString());
+
+        Object.entries(filters).forEach(([key, value]) => {
           if (value) {
-            if (value.min !== undefined) acc[`${key}_min`] = value.min.toString();
-            if (value.max !== undefined) acc[`${key}_max`] = value.max.toString();
-            if (value.start !== undefined) acc[`${key}_start`] = `${value.start}`;
-            if (value.end !== undefined) acc[`${key}_end`] = `${value.end}`;
-            if (value.value !== undefined) acc[key] = `${value.value}`;
+            if (value.min !== undefined)
+              queryParams.append(`${key}_min`, value.min.toString());
+            if (value.max !== undefined)
+              queryParams.append(`${key}_max`, value.max.toString());
+            if (value.start !== undefined)
+              queryParams.append(`${key}_start`, `${value.start}`);
+            if (value.end !== undefined) queryParams.append(`${key}_end`, `${value.end}`);
+            if (value.value !== undefined) queryParams.append(key, `${value.value}`);
           }
-          return acc;
-        }, {} as Record<string, string>),
-      });
+        });
 
-      // Add sort parameter if sorting is active
-      if (sort) {
-        queryParams.append("sort", sort.order === "desc" ? `-${sort.key}` : sort.key);
+        if (sort) {
+          queryParams.append("sort", sort.order === "desc" ? `-${sort.key}` : sort.key);
+        }
+
+        if (searchable && searchText) {
+          queryParams.append("search", searchText);
+        }
       }
 
-      // Add search parameter if search is active
-      if (searchable && searchText) {
-        queryParams.append("search", searchText);
+      const response = await axiosInstance.get(
+        `${url}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
+      );
+
+      if (mode === "client" && !clientData.length) {
+        setClientData(response.data.data);
       }
 
-      return axiosInstance.get(`${url}?${queryParams.toString()}`);
+      return response;
     },
     meta: {
       showToastOnError: isInitialLoaded,
@@ -155,15 +267,19 @@ const Table: React.FC<TableType> = ({
   });
 
   useEffect(() => {
-    if (data?.data) {
+    if (mode === "server" && data?.data) {
       setTotalPages(data.data.totalPages);
       setTotalRecords(data.data.totalRecords);
       setIsInitialLoaded(true);
 
       lastSuccessfulPage.current = page;
       lastSuccessfulPageSize.current = pageSize;
+    } else if (mode === "client" && processedData) {
+      setTotalPages(processedData.totalPages);
+      setTotalRecords(processedData.totalRecords);
+      setIsInitialLoaded(true);
     }
-  }, [data, page, pageSize]);
+  }, [data, page, pageSize, mode, processedData]);
 
   useEffect(() => {
     if (error && isInitialLoaded) {
@@ -180,13 +296,15 @@ const Table: React.FC<TableType> = ({
 
   const handlePageSizeChange = (newSize: number) => {
     if (!isLoadingError) {
-      previousPage.current = 1; // When changing page size, we always go to page 1
+      previousPage.current = 1;
       setPage(1);
       setPageSize(newSize);
     }
   };
 
   const apiError = error as ApiError | null;
+  const displayData =
+    mode === "client" && processedData ? processedData.data : data?.data?.data;
 
   return (
     <div className="flex flex-col gap-4 flex-1 relative justify-start h-full">
@@ -200,46 +318,46 @@ const Table: React.FC<TableType> = ({
       ) : (
         <>
           {(isFetching || loadingExport) && <LoaderInner />}
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start gap-4">
             <TableFilters
               allFilters={columns as TableFilterType[]}
               onFilterChange={handleFilterChange}
               chosenFilters={filters}
             />
-          </div>
-          <div className="flex justify-between items-start">
-            {searchable && (
-              <div className="relative w-full max-w-[500px]">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                  onChange={(e) => handleSearch(e.target.value)}
-                />
-                <svg
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <div className="flex items-center gap-4">
+              {searchable && (
+                <div className="relative w-[300px]">
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full dark:bg-gray-900 dark:text-white"
+                    onChange={(e) => handleSearch(e.target.value)}
                   />
-                </svg>
-              </div>
-            )}
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer ml-[10px] min-w-[140px] text-center"
-              onClick={handleExport}
-            >
-              Export to CSV
-            </button>
+                  <svg
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              )}
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer min-w-[140px] text-center"
+                onClick={handleExport}
+              >
+                Export to CSV
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -288,7 +406,7 @@ const Table: React.FC<TableType> = ({
                 </tr>
               </thead>
               <tbody>
-                {data?.data?.data?.map((row) => (
+                {displayData?.map((row) => (
                   <tr
                     key={row.id}
                     className="border-b border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -307,7 +425,8 @@ const Table: React.FC<TableType> = ({
               </tbody>
             </table>
           </div>
-          <ol className="flex justify-end text-xs font-medium space-x-1">
+
+          <ol className="flex items-center justify-end gap-2">
             <li className="flex items-center justify-center pr-[15px]">
               <select
                 className="w-20 h-8 border border-gray-300 rounded cursor-pointer disabled:opacity-50 disabled:cursor-default px-[5px] dark:bg-gray-900 dark:text-white"

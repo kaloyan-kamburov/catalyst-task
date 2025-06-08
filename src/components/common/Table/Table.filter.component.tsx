@@ -37,7 +37,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
     handleFilterChange(filter.key, updatedValue);
   };
 
-  const renderFlter = () => {
+  const renderFilter = () => {
     switch (filter.type) {
       case "number":
         return (
@@ -153,7 +153,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
           </button>
         )}
       </label>
-      {renderFlter()}
+      {renderFilter()}
     </>
   );
 };

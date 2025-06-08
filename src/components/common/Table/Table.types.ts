@@ -10,6 +10,13 @@ export interface TableColumn {
   sortable?: boolean;
 }
 
+export interface TableRow {
+  id: string | number;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+export type TableMode = "server" | "client";
+
 export interface TableType {
   url: string;
   columns: TableColumn[];
@@ -17,6 +24,7 @@ export interface TableType {
   searchable?: boolean;
   minWidth?: number;
   csvExport?: boolean;
+  mode?: TableMode;
 }
 
 export type TableFilterType = TableColumn & {
@@ -31,11 +39,6 @@ export type TableFilterValue = Partial<{
   end: string;
   value: string;
 }>;
-
-export interface TableRow {
-  id: string | number;
-  [key: string]: string | number | undefined;
-}
 
 export interface TableResponse {
   data: {

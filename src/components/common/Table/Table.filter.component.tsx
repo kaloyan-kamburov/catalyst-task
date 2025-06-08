@@ -102,7 +102,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
         return (
           <div className="flex flex-col gap-2">
             <select
-              className="w-full px-2 py-1 border border-gray-300 rounded"
+              className="w-full px-2 py-1 border border-gray-300 rounded dark:bg-gray-900 dark:text-white"
               onChange={(e) =>
                 handleChange({
                   value: e.target.value || undefined,

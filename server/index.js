@@ -20,7 +20,7 @@ app.get("/transactions", (req, res) => {
       totalPages: 5,
       totalRecords: 14,
     });
-  }, 500);
+  }, 1500);
 
   //return error
   // res.status(500).json({

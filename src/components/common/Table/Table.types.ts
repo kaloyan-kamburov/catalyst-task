@@ -7,7 +7,6 @@ export interface TableColumn {
   filterable?: boolean;
   filterType?: "range" | "date" | "select";
   filterOptions?: string[];
-  /** Whether the column is sortable. Defaults to true. Set to false to disable sorting. */
   sortable?: boolean;
 }
 
@@ -15,9 +14,9 @@ export interface TableType {
   url: string;
   columns: TableColumn[];
   pageSizeOptions?: number[];
-  /** Whether to enable search functionality. Defaults to true. */
   searchable?: boolean;
   minWidth?: number;
+  csvExport?: boolean;
 }
 
 export type TableFilterType = TableColumn & {

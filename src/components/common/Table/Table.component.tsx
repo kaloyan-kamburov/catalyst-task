@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+
 import {
   axiosInstance,
   type ApiError,
@@ -40,7 +42,8 @@ const Table: React.FC<TableType> = ({
   const [filters, setFilters] = useState<{ [key: string]: TableFilterValue }>({});
   const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [loadingExport, setLoadingExport] = useState(false);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const lastSuccessfulPage = useRef(page);
@@ -70,12 +73,38 @@ const Table: React.FC<TableType> = ({
       }
 
       searchTimeout.current = setTimeout(() => {
-        setSearchTerm(value);
+        setSearchText(value);
         setPage(1);
       }, 500);
     },
-    [setSearchTerm, setPage]
+    [setSearchText, setPage]
   );
+
+  const handleExport = async () => {
+    setLoadingExport(true);
+    try {
+      const exportUrl = `${url}?export=true`;
+      const response = await axiosInstance.get(exportUrl, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], { type: "text/csv;charset=utf-8;" });
+      const urlObj = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const dateTime = new Date().toLocaleDateString().replace(/_/, "-");
+      link.href = urlObj;
+      link.setAttribute("download", `export_${dateTime}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(urlObj);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_e) {
+      toast.error("Error while exporting to CSV");
+    } finally {
+      setLoadingExport(false);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -89,7 +118,7 @@ const Table: React.FC<TableType> = ({
     TableResponse,
     ApiError
   >({
-    queryKey: ["transactions", page, pageSize, filters, sort, searchTerm],
+    queryKey: ["transactions", page, pageSize, filters, sort, searchText],
     queryFn: async () => {
       const queryParams = new URLSearchParams({
         page: page.toString(),
@@ -112,8 +141,8 @@ const Table: React.FC<TableType> = ({
       }
 
       // Add search parameter if search is active
-      if (searchable && searchTerm) {
-        queryParams.append("search", searchTerm);
+      if (searchable && searchText) {
+        queryParams.append("search", searchText);
       }
 
       return axiosInstance.get(`${url}?${queryParams.toString()}`);
@@ -170,7 +199,7 @@ const Table: React.FC<TableType> = ({
         />
       ) : (
         <>
-          {isFetching && <LoaderInner />}
+          {(isFetching || loadingExport) && <LoaderInner />}
           <div className="flex justify-between items-start">
             <TableFilters
               allFilters={columns as TableFilterType[]}
@@ -178,32 +207,41 @@ const Table: React.FC<TableType> = ({
               chosenFilters={filters}
             />
           </div>
-          {searchable && (
-            <div className="relative w-full max-w-[500px]">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-              <svg
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          <div className="flex justify-between items-start">
+            {searchable && (
+              <div className="relative w-full max-w-[500px]">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                  onChange={(e) => handleSearch(e.target.value)}
                 />
-              </svg>
-            </div>
-          )}
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            )}
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer ml-[10px] min-w-[140px] text-center"
+              onClick={handleExport}
+            >
+              Export to CSV
+            </button>
+          </div>
+
           <div className="overflow-x-auto">
             <table
               className={`table-auto w-full border border-gray-300 rounded min-w-[${minWidth}px]`}
@@ -272,7 +310,7 @@ const Table: React.FC<TableType> = ({
           <ol className="flex justify-end text-xs font-medium space-x-1">
             <li className="flex items-center justify-center pr-[15px]">
               <select
-                className="w-20 h-8 border border-gray-300 rounded cursor-pointer disabled:opacity-50 disabled:cursor-default px-[5px] dark:bg-gray-700 dark:text-white"
+                className="w-20 h-8 border border-gray-300 rounded cursor-pointer disabled:opacity-50 disabled:cursor-default px-[5px] dark:bg-gray-900 dark:text-white"
                 value={pageSize}
                 onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                 disabled={isLoadingError}

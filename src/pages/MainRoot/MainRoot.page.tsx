@@ -4,7 +4,7 @@ const MainRootPage = () => {
   return (
     <div className="flex flex-col h-full">
       <Header />
-      <div className="flex-1">
+      <div className="flex-1 p-2">
         <Outlet />
       </div>
     </div>

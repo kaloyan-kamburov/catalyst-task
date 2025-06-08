@@ -160,7 +160,7 @@ const Table: React.FC<TableType> = ({
   const apiError = error as ApiError | null;
 
   return (
-    <div className="flex flex-col gap-4 flex-1 relative justify-start">
+    <div className="flex flex-col gap-4 flex-1 relative justify-start h-full">
       {isLoading ? (
         <LoaderInner />
       ) : isLoadingError && !isInitialLoaded ? (

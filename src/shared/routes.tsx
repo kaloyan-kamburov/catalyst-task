@@ -4,6 +4,7 @@ import MainRootPage from "../pages/MainRoot/MainRoot.page";
 import ErrorGlobal from "../components/common/Errors/ErrorGlobal.component";
 
 const HomePage = lazy(() => import("../pages/Home/Home.page"));
+const TransactionPage = lazy(() => import("../pages/Transaction/Transaction.page"));
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
         path: "/",
         element: <HomePage />,
         index: true,
+      },
+      {
+        path: "/transaction/:id",
+        element: <TransactionPage />,
       },
     ],
   },

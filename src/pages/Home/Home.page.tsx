@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Link } from "react-router-dom";
 import Table from "../../components/common/Table/Table.component";
 
 /*
@@ -22,74 +23,83 @@ import Table from "../../components/common/Table/Table.component";
 
 const Home = () => {
   return (
-    <div className="p-2">
-      <Table
-        url="transactions"
-        columns={[
-          {
-            key: "id",
-            label: "ID",
-            type: "string",
-          },
-          {
-            key: "amount",
-            label: "Amount",
-            type: "number",
-            filterable: true,
-          },
-          {
-            key: "currency",
-            label: "Currency",
-            type: "string",
-          },
-          {
-            key: "status",
-            label: "Status",
-            type: "select",
-            filterable: true,
-            filterOptions: ["pending", "completed", "failed"],
-          },
-          {
-            key: "date",
-            label: "Date",
-            type: "date",
-            filterable: true,
-          },
-          {
-            key: "description",
-            label: "Description",
-            type: "string",
-          },
-          {
-            key: "customer.name",
-            label: "Customer Name",
-            render: (row: any) => row.customer?.name,
-            type: "string",
-          },
-          {
-            key: "customer.email",
-            label: "Customer Email",
-            render: (row: any) => row.customer.email,
-            type: "string",
-          },
-          {
-            key: "paymentMethod",
-            label: "Payment Method",
-            type: "string",
-          },
-          {
-            key: "cardLast4",
-            label: "Card Last 4",
-            type: "string",
-          },
-          {
-            key: "fees",
-            label: "Fees",
-            type: "number",
-          },
-        ]}
-      />
-    </div>
+    <Table
+      url="transactions"
+      columns={[
+        {
+          key: "id",
+          label: "ID",
+          type: "string",
+        },
+        {
+          key: "amount",
+          label: "Amount",
+          type: "number",
+          filterable: true,
+        },
+        {
+          key: "currency",
+          label: "Currency",
+          type: "string",
+        },
+        {
+          key: "status",
+          label: "Status",
+          type: "select",
+          filterable: true,
+          filterOptions: ["pending", "completed", "failed"],
+        },
+        {
+          key: "date",
+          label: "Date",
+          type: "date",
+          filterable: true,
+        },
+        {
+          key: "description",
+          label: "Description",
+          type: "string",
+        },
+        {
+          key: "customer.name",
+          label: "Customer Name",
+          render: (row: any) => row.customer?.name,
+          type: "string",
+        },
+        {
+          key: "customer.email",
+          label: "Customer Email",
+          render: (row: any) => row.customer.email,
+          type: "string",
+        },
+        {
+          key: "paymentMethod",
+          label: "Payment Method",
+          type: "string",
+        },
+        {
+          key: "cardLast4",
+          label: "Card Last 4",
+          type: "string",
+        },
+        {
+          key: "fees",
+          label: "Fees",
+          type: "number",
+        },
+        {
+          key: "actions",
+          label: "Actions",
+          type: "string",
+          sortable: false,
+          render: (row: any) => (
+            <Link className="text-blue-500" to={`/transaction/${row.id}`}>
+              View
+            </Link>
+          ),
+        },
+      ]}
+    />
   );
 };
 

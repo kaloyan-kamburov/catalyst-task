@@ -28,6 +28,12 @@ app.get("/transactions", (req, res) => {
   // });
 });
 
+app.get("/transaction/:id", (req, res) => {
+  const { id } = req.params;
+  const transaction = mockTransactions.find((t) => t.id === id);
+  res.json(transaction);
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

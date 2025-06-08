@@ -75,7 +75,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="date"
-              className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded"
+              className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded dark:color-scheme-dark"
               onChange={(e) =>
                 handleChange({
                   ...localValue,

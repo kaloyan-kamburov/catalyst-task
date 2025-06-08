@@ -7,24 +7,27 @@ import { Toaster } from "react-hot-toast";
 import LoaderPage from "./components/common/Loaders/LoaderPage.component";
 import router from "./shared/routes";
 import queryClient from "./shared/queryClient";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const App = () => (
   <StrictMode>
-    <Suspense fallback={<LoaderPage />}>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: "#333",
-              color: "#fff",
-            },
-          }}
-        />
-      </QueryClientProvider>
-    </Suspense>
+    <ThemeProvider>
+      <Suspense fallback={<LoaderPage />}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: "#333",
+                color: "#fff",
+              },
+            }}
+          />
+        </QueryClientProvider>
+      </Suspense>
+    </ThemeProvider>
   </StrictMode>
 );
 

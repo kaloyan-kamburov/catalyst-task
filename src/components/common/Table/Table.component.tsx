@@ -213,7 +213,9 @@ const Table: React.FC<TableType> = ({
                   {columns.map((column) => (
                     <th
                       className={`p-[5px] border-b border-gray-300 ${
-                        column.sortable !== false ? "cursor-pointer hover:bg-gray-50" : ""
+                        column.sortable !== false
+                          ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                          : ""
                       }`}
                       key={column.key}
                       onClick={() => column.sortable !== false && handleSort(column.key)}
@@ -249,7 +251,10 @@ const Table: React.FC<TableType> = ({
               </thead>
               <tbody>
                 {data?.data?.data?.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-300 hover:bg-gray-50">
+                  <tr
+                    key={row.id}
+                    className="border-b border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     {columns.map((column) => (
                       <td
                         className={`${column.align || "text-center"} px-[5px]`}
@@ -267,7 +272,7 @@ const Table: React.FC<TableType> = ({
           <ol className="flex justify-end text-xs font-medium space-x-1">
             <li className="flex items-center justify-center pr-[15px]">
               <select
-                className="w-20 h-8 border border-gray-300 rounded cursor-pointer disabled:opacity-50 disabled:cursor-default px-[5px]"
+                className="w-20 h-8 border border-gray-300 rounded cursor-pointer disabled:opacity-50 disabled:cursor-default px-[5px] dark:bg-gray-700 dark:text-white"
                 value={pageSize}
                 onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                 disabled={isLoadingError}

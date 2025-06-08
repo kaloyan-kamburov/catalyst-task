@@ -34,47 +34,47 @@ const TransactionDetails: FC<TransactionDetailsProps> = ({ id }) => {
       </h1>
       <table className="table-auto w-full mt-[5px]">
         <tbody>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">ID</td>
             <td>{data?.id}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Amount</td>
             <td>{data?.amount}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Currency</td>
             <td>{data?.currency}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Status</td>
             <td>{data?.status}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Date</td>
             <td>{new Date(data?.date ?? "").toLocaleDateString()}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Description</td>
             <td>{data?.description}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Merchant</td>
             <td>{data?.merchant}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Customer</td>
             <td>{data?.customer.name}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Payment Method</td>
             <td>{data?.paymentMethod}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Card Last 4</td>
             <td>{data?.cardLast4}</td>
           </tr>
-          <tr className="hover:bg-gray-100">
+          <tr className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <td className="font-bold p-1">Fees</td>
             <td>{data?.fees}</td>
           </tr>

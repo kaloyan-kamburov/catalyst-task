@@ -104,7 +104,7 @@ const TableFilters = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`inline-flex items-center justify-center px-[10px] py-2 border border-gray-300 relative rounded cursor-pointer disabled:opacity-50 disabled:cursor-default mr-auto ${
-          isOpen ? "bg-gray-100" : ""
+          isOpen ? "bg-gray-100 dark:bg-gray-700" : ""
         }`}
       >
         <svg

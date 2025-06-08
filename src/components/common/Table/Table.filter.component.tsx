@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import type { TableFilterType, TableFilterValue } from "./Table.types";
+import type { TableFilterType, TableFilterValueType } from "./Table.types";
 
 interface TableFilterProps {
   filter: TableFilterType;
-  handleFilterChange: (key: string, value: TableFilterValue) => void;
-  value?: TableFilterValue;
+  handleFilterChange: (key: string, value: TableFilterValueType) => void;
+  value?: TableFilterValueType;
 }
 
 const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) => {
-  const [localValue, setLocalValue] = useState<TableFilterValue | undefined>(value);
+  const [localValue, setLocalValue] = useState<TableFilterValueType | undefined>(value);
 
   useEffect(() => {
     setLocalValue(value);
@@ -31,7 +31,7 @@ const TableFilter = ({ filter, handleFilterChange, value }: TableFilterProps) =>
     }
   };
 
-  const handleChange = (newValue: TableFilterValue) => {
+  const handleChange = (newValue: TableFilterValueType) => {
     const updatedValue = { ...localValue, ...newValue };
     setLocalValue(updatedValue);
     handleFilterChange(filter.key, updatedValue);

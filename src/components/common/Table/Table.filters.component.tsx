@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import type { TableFilterType, TableFilterValue } from "./Table.types";
+import type { TableFilterType, TableFilterValueType } from "./Table.types";
 import TableFilter from "./Table.filter.component";
 
 interface TableFiltersProps {
   allFilters: TableFilterType[];
-  onFilterChange?: (filters: { [key: string]: TableFilterValue }) => void;
-  chosenFilters: { [key: string]: TableFilterValue };
+  onFilterChange?: (filters: { [key: string]: TableFilterValueType }) => void;
+  chosenFilters: { [key: string]: TableFilterValueType };
 }
 
 const TableFilters = ({
@@ -17,7 +17,6 @@ const TableFilters = ({
   const [localFilters, setLocalFilters] = useState<typeof chosenFilters>(chosenFilters);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Update local filters when chosen filters change from parent
   useEffect(() => {
     setLocalFilters(chosenFilters);
   }, [chosenFilters]);
@@ -69,7 +68,7 @@ const TableFilters = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleFilterChange = (key: string, value: TableFilterValue) => {
+  const handleFilterChange = (key: string, value: TableFilterValueType) => {
     const newFilters = {
       ...localFilters,
       [key]: value
@@ -80,7 +79,7 @@ const TableFilters = ({
         : undefined,
     };
 
-    setLocalFilters(newFilters as { [key: string]: TableFilterValue });
+    setLocalFilters(newFilters as { [key: string]: TableFilterValueType });
 
     if (errors[key]) {
       setErrors((prev) => {
@@ -94,7 +93,6 @@ const TableFilters = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateFilters()) {
-      // Always notify parent of filter changes, even when clearing
       onFilterChange?.(localFilters);
     }
   };
@@ -149,7 +147,7 @@ const TableFilters = ({
                   <TableFilter
                     filter={filter}
                     handleFilterChange={handleFilterChange}
-                    value={localFilters[filter.key] as TableFilterValue}
+                    value={localFilters[filter.key] as TableFilterValueType}
                   />
                   {errors[filter.key] && (
                     <div className="text-red-500 text-xs mt-1">{errors[filter.key]}</div>

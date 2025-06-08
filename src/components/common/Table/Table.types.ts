@@ -3,14 +3,14 @@ export interface TableColumn {
   label: string;
   type?: "string" | "number" | "date" | "select";
   align?: "text-left" | "text-center" | "text-right";
-  render?: (row: TableRow) => React.ReactNode;
+  render?: (row: TableRowType) => React.ReactNode;
   filterable?: boolean;
   filterType?: "range" | "date" | "select";
   filterOptions?: string[];
   sortable?: boolean;
 }
 
-export interface TableRow {
+export interface TableRowType {
   id: string | number;
   [key: string]: string | number | boolean | null | undefined;
 }
@@ -32,7 +32,7 @@ export type TableFilterType = TableColumn & {
   filterType: "range" | "date" | "select";
 };
 
-export type TableFilterValue = Partial<{
+export type TableFilterValueType = Partial<{
   min: number;
   max: number;
   start: string;
@@ -40,9 +40,9 @@ export type TableFilterValue = Partial<{
   value: string;
 }>;
 
-export interface TableResponse {
+export interface TableResponseType {
   data: {
-    data: TableRow[];
+    data: TableRowType[];
     totalPages: number;
     totalRecords: number;
   };

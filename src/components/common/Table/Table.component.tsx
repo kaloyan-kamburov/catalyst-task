@@ -10,9 +10,9 @@ import {
 import type {
   TableFilterType,
   TableType,
-  TableFilterValue,
-  TableResponse,
-  TableRow,
+  TableFilterValueType,
+  TableResponseType,
+  TableRowType,
 } from "./Table.types";
 import LoaderInner from "../Loaders/LoaderInner.component";
 import ErrorInner from "../Errors/ErrorInner.component";
@@ -44,21 +44,20 @@ const Table: React.FC<TableType> = ({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(pageSizeOptions[0]);
   const [sort, setSort] = useState<{ key: string; order: "asc" | "desc" } | null>(null);
-  const [filters, setFilters] = useState<{ [key: string]: TableFilterValue }>({});
+  const [filters, setFilters] = useState<{ [key: string]: TableFilterValueType }>({});
   const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [loadingExport, setLoadingExport] = useState(false);
-  const [clientData, setClientData] = useState<TableRow[]>([]);
+  const [clientData, setClientData] = useState<TableRowType[]>([]);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const lastSuccessfulPage = useRef(page);
   const lastSuccessfulPageSize = useRef(pageSize);
   const previousPage = useRef(page);
 
-  // Client-side data processing functions
   const filterClientData = useCallback(
-    (data: TableRow[]) => {
+    (data: TableRowType[]) => {
       let filteredData = [...data];
 
       if (Object.keys(filters).length > 0) {
@@ -154,7 +153,7 @@ const Table: React.FC<TableType> = ({
     return null;
   }, [mode, clientData, filterClientData, page, pageSize]);
 
-  const handleFilterChange = (newFilters: { [key: string]: TableFilterValue }) => {
+  const handleFilterChange = (newFilters: { [key: string]: TableFilterValueType }) => {
     setFilters(newFilters);
     setPage(1);
   };
@@ -209,7 +208,7 @@ const Table: React.FC<TableType> = ({
   };
 
   const { data, isLoading, isFetching, isLoadingError, error, refetch } = useQuery<
-    TableResponse,
+    TableResponseType,
     ApiError
   >({
     queryKey: [

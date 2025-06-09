@@ -126,5 +126,6 @@ The application will be available at `http://localhost:5173`
 - There is no redux state management added (only context api for changing the theme to light/dark). If added, I would prefer RTK Query instead of react-query, since it's more standard approach imho.
 - Query params for range and date filtering are assumed to be suffixes (e.g. "{name}\_start")
 - Export to CSV functionality is only by adding "&export=true" to the url. Other approaches is to have the params in it (in case the customer wants the data to be filtered/sorted/paginated).
+- Responsive design is only in the filters component
 
 # NOTE: I'll be honest - 50% of the code is vibe coded. During the process I've supervized it. Overall time that this task took me was 5-6h, but I think AI saved a lot of time.

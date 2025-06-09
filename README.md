@@ -1,54 +1,46 @@
-# React + TypeScript + Vite
+# Catalyst task
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Create a React application for a financial transaction dashboard that displays
+transaction data with filtering, sorting, and detailed view capabilities.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
+## Description
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Requirements
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Display a list of transactions in a table format
+- Implement filtering by date range, amount range, and status
+- Add sorting functionality for all columns
+- Create a detailed view modal/page for individual transactions
+- Implement pagination for the transaction list
+- Add a search functionality that works across transaction fields
+
+## Technical Specifications:
+
+- Use React 18+ with functional components and hooks
+- Use React Query for data fetching (mock API provided)
+- Style with TailwindCSS
+- Add loading states and error handling
+- Include form validation for filters
+
+## Provided Data:
 
 ```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+{
+  "id": "tx_123456",
+  "amount": 1250.50,
+  "currency": "USD",
+  "status": "completed",
+  "date": "2025-01-15T10:30:00Z",
+  "description": "Online purchase",
+  "merchant": "Tech Store Inc",
+  "customer": {
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  "paymentMethod": "credit_card",
+  "cardLast4": "1234",
+  "fees": 25.10
+}
 ```

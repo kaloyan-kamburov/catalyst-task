@@ -2,10 +2,6 @@
 
 A React-based web application for managing transactions with server and client-side table functionality.
 
-### Description
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
 ## Requirements
 
 - Display a list of transactions in a table format

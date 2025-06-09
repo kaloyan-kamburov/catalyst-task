@@ -147,4 +147,4 @@ The application will be available at `http://localhost:5173`
 - Some simple unit tests in the table component are added only for demo purposes.
 - Responsive design is only in the filters component.
 
-### NOTE: I'll be honest - 50% of the code is vibe coded. During the process I've supervized it. Overall time that this task took me was 5-6h, but I think AI saved a lot of time.
+### NOTE: I'll be honest - 50% of the code is vibe coded. During the process I supervized it, I mean I was checking what was generated :) Overall time that this task took me was 5-6h, but I think AI saved a lot of time.

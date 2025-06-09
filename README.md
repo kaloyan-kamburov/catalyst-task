@@ -85,6 +85,10 @@ npm start
 ```bash
 npm install
 ```
+Note: maybe you'll need to add legacy-peer-deps flag:
+```
+npm install --legacy-peer-deps
+```
 
 4. Start the development server:
 

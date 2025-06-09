@@ -23,6 +23,22 @@ If you are developing a production application, we recommend updating the config
 - Add loading states and error handling
 - Include form validation for filters
 
+## Bonus Points:
+
+- Add data export functionality (CSV/JSON)
+- Implement dark/light theme toggle
+- Include tests (UI, Integration, unit)
+
+## Evaluation Criteria:
+
+- Code quality and organization
+- Component architecture and reusability
+- State management implementation
+- UI/UX design decisions
+- Error handling and edge cases
+- Performance considerations
+- Responsive design quality
+
 ## Provided Data (mock response):
 
 ```js
@@ -118,14 +134,17 @@ The application will be available at `http://localhost:5173`
 - React Query
 - React Router
 - Axios
+- React hot toast
 
 ## Assumptions
 
-- The server folder is dummy and is used only for dev purposes and is using mocked and randomized data in order to simulate real data delivered
+- The server folder is dummy and is used only for dev purposes and is using mocked and randomized data in order to simulate real data delivered.
 - Table component has 2 modes - server/client. When set in server mode, it will add query params to the request url for filtering/sorting/pagination/search. When set in client mode, it will filter/sort/paginate/search the data locally, without sending requests.
 - There is no redux state management added (only context api for changing the theme to light/dark). If added, I would prefer RTK Query instead of react-query, since it's more standard approach imho.
 - Query params for range and date filtering are assumed to be suffixes (e.g. "{name}\_start")
 - Export to CSV functionality is only by adding "&export=true" to the url. Other approaches is to have the params in it (in case the customer wants the data to be filtered/sorted/paginated).
-- Responsive design is only in the filters component
+- Added "react-hot-toast" library for showing some inormation for error edge cases (e.g. if server returns error when changing the page).
+- Some simple unit tests in the table component are added only for demo purposes.
+- Responsive design is only in the filters component.
 
-# NOTE: I'll be honest - 50% of the code is vibe coded. During the process I've supervized it. Overall time that this task took me was 5-6h, but I think AI saved a lot of time.
+### NOTE: I'll be honest - 50% of the code is vibe coded. During the process I've supervized it. Overall time that this task took me was 5-6h, but I think AI saved a lot of time.

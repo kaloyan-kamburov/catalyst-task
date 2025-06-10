@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 
 import {
   axiosInstance,
@@ -17,20 +16,9 @@ import type {
 import LoaderInner from "../Loaders/LoaderInner.component";
 import ErrorInner from "../Errors/ErrorInner.component";
 import TableFilters from "./Table.filters.component";
-
-const formatValue = (
-  value: string | number | boolean | null | undefined,
-  type: string
-): string => {
-  if (value === undefined || value === null) return "";
-  if (type === "number" && typeof value === "number") {
-    return value.toFixed(2);
-  }
-  if (type === "date" && (typeof value === "string" || typeof value === "number")) {
-    return new Date(String(value)).toLocaleDateString();
-  }
-  return String(value);
-};
+import TableSearch from "./Table.search.component";
+import TableExport from "./Table.export.component";
+import { formatValue } from "./Table.utils";
 
 const Table: React.FC<TableType> = ({
   url,
@@ -39,6 +27,7 @@ const Table: React.FC<TableType> = ({
   searchable = true,
   minWidth = 1400,
   mode = "server",
+  csvExport = true,
 }) => {
   const [isInitialLoaded, setIsInitialLoaded] = useState(false);
   const [page, setPage] = useState(1);
@@ -50,7 +39,6 @@ const Table: React.FC<TableType> = ({
   const [searchText, setSearchText] = useState("");
   const [loadingExport, setLoadingExport] = useState(false);
   const [clientData, setClientData] = useState<TableRowType[]>([]);
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const lastSuccessfulPage = useRef(page);
   const lastSuccessfulPageSize = useRef(pageSize);
@@ -165,46 +153,6 @@ const Table: React.FC<TableType> = ({
       }
       return { key, order: "asc" };
     });
-  };
-
-  const handleSearch = useCallback(
-    (value: string) => {
-      if (searchTimeout?.current) {
-        clearTimeout(searchTimeout.current);
-      }
-
-      searchTimeout.current = setTimeout(() => {
-        setSearchText(value);
-        setPage(1);
-      }, 500);
-    },
-    [setSearchText, setPage]
-  );
-
-  const handleExport = async () => {
-    setLoadingExport(true);
-    try {
-      const exportUrl = `${url}?export=true`;
-      const response = await axiosInstance.get(exportUrl, {
-        responseType: "blob",
-      });
-
-      const blob = new Blob([response.data], { type: "text/csv;charset=utf-8;" });
-      const urlObj = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      const dateTime = new Date().toLocaleDateString().replace(/_/, "-");
-      link.href = urlObj;
-      link.setAttribute("download", `export_${dateTime}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(urlObj);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      toast.error("Error while exporting to CSV");
-    } finally {
-      setLoadingExport(false);
-    }
   };
 
   const { data, isLoading, isFetching, isLoadingError, error, refetch } = useQuery<
@@ -325,37 +273,9 @@ const Table: React.FC<TableType> = ({
             />
             <div className="flex items-center gap-4">
               {searchable && (
-                <div className="relative w-[300px]">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="px-3 py-2 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full dark:bg-gray-900 dark:text-white"
-                    onChange={(e) => handleSearch(e.target.value)}
-                  />
-                  <svg
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    width="20"
-                    height="20"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
+                <TableSearch setSearchText={setSearchText} setPage={setPage} />
               )}
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer min-w-[140px] text-center"
-                onClick={handleExport}
-              >
-                Export to CSV
-              </button>
+              {csvExport && <TableExport url={url} setLoadingExport={setLoadingExport} />}
             </div>
           </div>
 

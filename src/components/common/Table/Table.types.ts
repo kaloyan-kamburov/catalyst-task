@@ -40,10 +40,20 @@ export type TableFilterValueType = Partial<{
   value: string;
 }>;
 
-export interface TableResponseType {
+export type TableResponseType = {
   data: {
     data: TableRowType[];
     totalPages: number;
     totalRecords: number;
   };
-}
+};
+
+export type TableSearchType = {
+  setSearchText: (value: string) => void;
+  setPage: (page: number) => void;
+};
+
+export type TableExportType = {
+  url: string;
+  setLoadingExport: (loading: boolean) => void;
+};

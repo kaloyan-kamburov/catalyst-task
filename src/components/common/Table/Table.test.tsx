@@ -3,14 +3,12 @@ import Table from "./Table.component";
 import type { TableColumn } from "./Table.types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// Mock react-hot-toast
 jest.mock("react-hot-toast", () => ({
   toast: {
     error: jest.fn(),
   },
 }));
 
-// Mock axios instance
 jest.mock("../../../shared/queryClient", () => ({
   axiosInstance: {
     get: jest.fn(() =>
@@ -29,7 +27,6 @@ jest.mock("../../../shared/queryClient", () => ({
   },
 }));
 
-// Mock child components
 jest.mock("../Loaders/LoaderInner.component", () => ({
   __esModule: true,
   default: () => <div data-testid="loader">Loading...</div>,
@@ -81,7 +78,6 @@ describe("Table component", () => {
     it("renders table with data", async () => {
       renderWithQuery(<Table columns={mockColumns} url="/api/test" mode="client" />);
 
-      // Should show loader initially
       expect(screen.getByTestId("loader")).toBeInTheDocument();
 
       await waitFor(() => {
@@ -99,17 +95,17 @@ describe("Table component", () => {
       });
 
       const ageHeader = screen.getByText("Age");
-      fireEvent.click(ageHeader); // Sort ascending
+      fireEvent.click(ageHeader);
 
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
-        expect(rows[1]).toHaveTextContent("Bob"); // 25
+        expect(rows[1]).toHaveTextContent("Bob");
       });
 
-      fireEvent.click(ageHeader); // Sort descending
+      fireEvent.click(ageHeader);
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
-        expect(rows[1]).toHaveTextContent("Charlie"); // 35
+        expect(rows[1]).toHaveTextContent("Charlie");
       });
     });
 
@@ -137,7 +133,6 @@ describe("Table component", () => {
     it("renders server-side data", async () => {
       renderWithQuery(<Table columns={mockColumns} url="/api/test" mode="server" />);
 
-      // Should show loader initially
       expect(screen.getByTestId("loader")).toBeInTheDocument();
 
       await waitFor(() => {
